@@ -21,17 +21,14 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
-      - name: Install Coverlet
-        run: dotnet tool install --global coverlet.console
       - name: Ensure coverage directory exists
         run: mkdir -p ${{ github.workspace }}/coverage
       - name: Test
         run: |
           dotnet test --no-build \
           --verbosity normal src/Usuario.Tests \
-          /p:CollectCoverage=true \
-          /p:CoverletOutput="${{ github.workspace }}/coverage/coverage.cobertura.xml" \
-          /p:CoverletOutputFormat=cobertura
+          --collect:"XPlat Code Coverage" \
+          --results-directory "${{ github.workspace }}/coverage"
       - name: Create dummy file for artifact
         run: echo "dummy" > ./coverage/dummy.txt
       - name: Upload coverage files
@@ -70,7 +67,7 @@ jobs:
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
           reportgenerator \
-          -reports:./coverage/coverage.cobertura.xml \
+          -reports:"./coverage/**/coverage.cobertura.xml" \
           -targetdir:./coverage/report \
           -reporttypes:Html
       - name: Upload coverage report
