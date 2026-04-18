@@ -28,6 +28,8 @@ jobs:
           --collect:"XPlat Code Coverage" \
           --results-directory ./coverage \
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+      - name: Ensure coverage directory exists
+        run: mkdir -p ./coverage
       - name: Upload coverage files
         uses: actions/upload-artifact@v4
         with:
