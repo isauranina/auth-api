@@ -1,0 +1,99 @@
+name: Staging to digitalocean
+
+on:
+  push:
+    tags:
+    - stage-*
+
+jobs: 
+  build:
+   
+    runs-on: ubuntu-latest
+   
+    steps:
+      - name: Checkout files    
+        uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: |
+          dotnet test --no-build \
+          --verbosity normal src/Usuario.Tests \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./coverage \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura
+      - name: Generate coverage report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+          -reports:"./coverage/**/coverage.cobertura.xml" \
+          -targetdir:"./coverage/report" \
+          -reporttypes:Html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_number }}
+          path: ./coverage/report
+          retention-days: 7
+      - name: Copy Docker file
+        run: cp ${{ github.workspace }}/docker-deploy/Dockerfile ${{ github.workspace }}/Dockerfile
+      - name: Upload Dockerfile as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dockerfile-${{ github.run_number }}
+          path: ${{ github.workspace }}/Dockerfile
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: inina14/auth-api
+          tag_with_ref: true
+          tag_with_sha: true
+        
+  deploy:
+    needs: build
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout files    
+        uses: actions/checkout@v2
+        
+      - name: Get tag name
+        id: get-tag
+        uses: olegtarasov/get-tag@v2.1
+        
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Preparar deploy.sh (tag + secretos)
+        run: |
+          sed -i "s|__IMAGE_TAG__|${{ steps.get-tag.outputs.tag_name }}|g" deploy.sh
+          sed -i "s|__JWT_SECRET__|${{ secrets.JWT_SECRET_KEY }}|g" deploy.sh
+      - name: Crear Droplet
+        run: |
+          REGION="nyc3"
+          SIZE="s-2vcpu-8gb-160gb-intel"
+          doctl compute droplet create "${{ steps.get-tag.outputs.tag_name }}" \
+            --region "${REGION}" \
+            --size "${SIZE}" \
+            --image "docker-22-04" \
+            --user-data-file deploy.sh \
+            --wait || \
+          doctl compute droplet create "${{ steps.get-tag.outputs.tag_name }}" \
+            --region "${REGION}" \
+            --size "${SIZE}" \
+            --image "docker-20-04" \
+            --user-data-file deploy.sh \
+            --wait
+
+    

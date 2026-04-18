@@ -1,0 +1,29 @@
+{
+  "name": "prueba-tecnica",
+  "version": "1.0.0",
+  "description": "API REST para gestión de transacciones bancarias desarrollada con Clean Architecture y .NET 9.0.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky",
+    "format:staged": "lint-staged"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isauranina/-API-RESTful-Transacciones.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/isauranina/-API-RESTful-Transacciones/issues"
+  },
+  "homepage": "https://github.com/isauranina/-API-RESTful-Transacciones#readme",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2"
+  },
+  "lint-staged": {
+    "*.cs": "node scripts/format-cs.js"
+  }
+}

@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Tester",
+    "lastname": "Uno",
+    "address": "Test 1",
+    "email": "tester@local",
+    "password": "secret123",
+    "isHost": true,
+    "isGuest": false
+  }
+]

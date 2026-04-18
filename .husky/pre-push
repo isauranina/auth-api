@@ -1,0 +1,2 @@
+echo "Ejecutando tests (Transacciones.Tests)..."
+dotnet test src/Transacciones.Tests/Transacciones.Tests.csproj --verbosity normal

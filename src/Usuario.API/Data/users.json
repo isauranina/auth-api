@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Carlos",
+    "lastname": "Betancourt",
+    "address": "Humberto 1ro 250, Santiago de Chile",
+    "email": "carlos.be@gmail.com",
+    "password": "Clave*",
+    "isHost": true,
+    "isGuest": false
+  },
+  {
+    "name": "Juan",
+    "lastname": "Perez",
+    "address": "km 9 la guardia, santa cruz, bolivia",
+    "email": "j.perez@gmail.com",
+    "password": "Clave*",
+    "isHost": false,
+    "isGuest": true
+  }
+]
