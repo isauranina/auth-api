@@ -27,20 +27,12 @@ jobs:
           --verbosity normal src/Usuario.Tests \
           --collect:"XPlat Code Coverage" \
           --results-directory ./coverage \
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura
-      - name: Generate coverage report
-        run: |
-          dotnet tool install --global dotnet-reportgenerator-globaltool
-          reportgenerator \
-          -reports:"./coverage/**/coverage.cobertura.xml" \
-          -targetdir:"./coverage/report" \
-          -reporttypes:Html
-      - name: Upload coverage report
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+      - name: Upload coverage files
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{ github.run_number }}
-          path: ./coverage/report
-          retention-days: 7
+          name: coverage-files
+          path: ./coverage
       - name: Copy Docker file
         run: cp ${{ github.workspace }}/docker-deploy/Dockerfile ${{ github.workspace }}/Dockerfile
       - name: Upload Dockerfile as artifact
@@ -56,6 +48,29 @@ jobs:
           repository: inina14/auth-api
           tag_with_ref: true
           tag_with_sha: true
+        
+  coverage:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download coverage files
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-files
+          path: ./coverage
+      - name: Generate coverage report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+          -reports:"./coverage/**/coverage.cobertura.xml" \
+          -targetdir:"./coverage/report" \
+          -reporttypes:Html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_number }}
+          path: ./coverage/report
+          retention-days: 7
         
   deploy:
     needs: build
