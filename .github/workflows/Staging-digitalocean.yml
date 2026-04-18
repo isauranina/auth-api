@@ -23,15 +23,15 @@ jobs:
         run: dotnet build --no-restore
       - name: Install Coverlet
         run: dotnet tool install --global coverlet.console
+      - name: Ensure coverage directory exists
+        run: mkdir -p ${{ github.workspace }}/coverage
       - name: Test
         run: |
           dotnet test --no-build \
           --verbosity normal src/Usuario.Tests \
           /p:CollectCoverage=true \
-          /p:CoverletOutput="${{ github.workspace }}/coverage/" \
+          /p:CoverletOutput="${{ github.workspace }}/coverage/coverage.cobertura.xml" \
           /p:CoverletOutputFormat=cobertura
-      - name: Ensure coverage directory exists
-        run: mkdir -p ./coverage
       - name: Create dummy file for artifact
         run: echo "dummy" > ./coverage/dummy.txt
       - name: Upload coverage files
