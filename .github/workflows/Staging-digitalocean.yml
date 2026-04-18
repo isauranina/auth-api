@@ -88,10 +88,6 @@ jobs:
       - name: Checkout files    
         uses: actions/checkout@v2
         
-      - name: Get tag name
-        id: get-tag
-        uses: olegtarasov/get-tag@v2.1
-        
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -99,9 +95,9 @@ jobs:
 
       - name: Preparar deploy.sh (tag + secretos)
         run: |
-          sed -i "s|__IMAGE_TAG__|${{ steps.get-tag.outputs.tag_name }}|g" deploy.sh
+          sed -i "s|__IMAGE_TAG__|${{ github.ref_name }}|g" deploy.sh
           sed -i "s|__JWT_SECRET__|${{ secrets.JWT_SECRET_KEY }}|g" deploy.sh
       - name: Crear Droplet
-        run: doctl compute droplet create "${{ steps.get-tag.outputs.tag_name }}" --image docker-20-04 --size s-1vcpu-1gb --region nyc1 --user-data-file deploy.sh --wait
+        run: doctl compute droplet create "${{ github.ref_name }}" --image docker-20-04 --size s-1vcpu-1gb --region nyc1 --user-data-file deploy.sh --wait
 
     
