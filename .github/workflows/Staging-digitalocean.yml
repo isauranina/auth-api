@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+      - name: Install Coverlet Collector
+        run: dotnet add src/Usuario.Tests package coverlet.collector
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -67,8 +69,8 @@ jobs:
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
           reportgenerator \
-          -reports:"./coverage/**/coverage.cobertura.xml" \
-          -targetdir:./coverage/report \
+          -reports:coverage/**/coverage.cobertura.xml \
+          -targetdir:coverage/report \
           -reporttypes:Html
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -102,7 +104,7 @@ jobs:
       - name: Crear Droplet
         run: |
           REGION="nyc3"
-          SIZE="s-2vcpu-8gb-160gb-intel"
+          SIZE="s-1vcpu-1gb"
           doctl compute droplet create "${{ steps.get-tag.outputs.tag_name }}" \
             --region "${REGION}" \
             --size "${SIZE}" \
