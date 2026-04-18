@@ -21,13 +21,15 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
       - name: Test
         run: |
           dotnet test --no-build \
           --verbosity normal src/Usuario.Tests \
-          --collect:"XPlat Code Coverage" \
-          --results-directory ./coverage \
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+          /p:CollectCoverage=true \
+          /p:CoverletOutput=./coverage/ \
+          /p:CoverletOutputFormat=cobertura
       - name: Ensure coverage directory exists
         run: mkdir -p ./coverage
       - name: Create dummy file for artifact
@@ -68,8 +70,8 @@ jobs:
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
           reportgenerator \
-          -reports:"./coverage/**/coverage.cobertura.xml" \
-          -targetdir:"./coverage/report" \
+          -reports:./coverage/coverage.cobertura.xml \
+          -targetdir:./coverage/report \
           -reporttypes:Html
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
