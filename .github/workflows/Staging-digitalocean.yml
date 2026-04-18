@@ -102,20 +102,6 @@ jobs:
           sed -i "s|__IMAGE_TAG__|${{ steps.get-tag.outputs.tag_name }}|g" deploy.sh
           sed -i "s|__JWT_SECRET__|${{ secrets.JWT_SECRET_KEY }}|g" deploy.sh
       - name: Crear Droplet
-        run: |
-          REGION="nyc3"
-          SIZE="s-1vcpu-1gb"
-          doctl compute droplet create "${{ steps.get-tag.outputs.tag_name }}" \
-            --region "${REGION}" \
-            --size "${SIZE}" \
-            --image "docker-22-04" \
-            --user-data-file deploy.sh \
-            --wait || \
-          doctl compute droplet create "${{ steps.get-tag.outputs.tag_name }}" \
-            --region "${REGION}" \
-            --size "${SIZE}" \
-            --image "docker-20-04" \
-            --user-data-file deploy.sh \
-            --wait
+        run: doctl compute droplet create "${{ steps.get-tag.outputs.tag_name }}" --image docker-20-04 --size s-1vcpu-1gb --region nyc1 --user-data-file deploy.sh --wait
 
     
